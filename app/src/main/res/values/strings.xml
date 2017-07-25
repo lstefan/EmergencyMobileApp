@@ -1,0 +1,111 @@
+<resources>
+    <string name="app_name">EmergencyMobileApp</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password (optional)</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <!-- Strings related to main activity -->
+    <string name="emergencyButton">Emergency call</string>
+    <string name="textType">Type</string>
+    <string name="textPriority">Priority</string>
+    <string name="textDoctors">Doctors required</string>
+    <string name="textNoPeople">No Of People</string>
+
+    <string-array name="types_array">
+        <item>Please select</item>
+        <item>Car crash</item>
+        <item>Fire</item>
+        <item>Explosion</item>
+        <item>Drowning</item>
+        <item>Sickness</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="priority_array">
+        <item>Please select</item>
+        <item>Low</item>
+        <item>Medium</item>
+        <item>High</item>
+    </string-array>
+
+    <string-array name="doctors_array">
+        <item>Please select</item>
+        <item>Audiologist</item>
+        <item>Allergist</item>
+        <item>Cardiologist</item>
+        <item>Dermatologist</item>
+        <item>Emergency Doctor</item>
+        <item>Endocrinologist</item>
+        <item>Epidemiologist</item>
+        <item>General Practitioner</item>
+        <item>Hepatologist</item>
+        <item>Infectious Disease Specialist</item>
+        <item>Neurophysiologist</item>
+        <item>Obstetrician</item>
+        <item>Oncologist</item>
+        <item>Orthopedist</item>
+        <item>Psychiatrist</item>
+    </string-array>
+
+    <string-array name="people_array">
+        <item>Please select</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3-5</item>
+        <item>6-10</item>
+        <item>>10</item>
+    </string-array>
+
+    <!--    Permissions    -->
+    <string name="permission_rationale_location">Access to the location service is required to show your current location on the map.</string>
+    <string name="location_permission_denied">This sample requires location permission to enable the \'my location\' layer. Please try again and grant access to use the location.\nIf the permission has been permanently denied, it can be enabled from the System Settings.</string>
+    <string name="permission_required_toast">Location permission is required.</string>
+
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="coordinates">Coordinates</string>
+    <string name="next">Next</string>
+    <string name="video">Data transmission</string>
+    <string name="joining">Waiting for doctors to join...</string>
+    <string name="navigate_to_location">Navigate To Location</string>
+    <string name="name">Name</string>
+    <string name="marker_type">Marker Type</string>
+    <string-array name="marker_types">
+        <item>Magenta</item>
+        <item>Violet</item>
+        <item>Orange</item>
+        <item>Red</item>
+        <item>Blue</item>
+        <item>Green</item>
+        <item>Azure</item>
+        <item>Rose</item>
+        <item>Cyan</item>
+        <item>Yellow</item>
+    </string-array>
+    <string name="places">Places</string>
+    <string name="add_place">Add Place</string>
+    <string name="clear_places">Clear Places</string>
+
+
+    <string name="btnTakePicture">Capture Image</string>
+    <string name="btnRecordVideo">Record Video</string>
+    <string name="or">(or)</string>
+    <string name="btnUploadToServer">Upload to Server</string>
+
+
+    <string name="btnSendToServer">Send</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_connection">ConnectionActivity</string>
+    <string name="title_activity_data">DataActivity</string>
+</resources>
