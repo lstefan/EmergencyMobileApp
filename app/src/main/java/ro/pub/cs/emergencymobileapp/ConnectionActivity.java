@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -88,13 +89,16 @@ public class ConnectionActivity extends AppCompatActivity {
 
         typeText = (EditText) findViewById(R.id.typeValue);
         typeText.setText(type);
+        typeText.setEnabled(false);
         noOfPeopleText = (EditText) findViewById(R.id.noOfPeopleValue);
         noOfPeopleText.setText(people);
+        noOfPeopleText.setEnabled(false);
         priorityText = (EditText) findViewById(R.id.priorityValue);
         priorityText.setText(priority);
+        priorityText.setEnabled(false);
         doctorsView = (ListView) findViewById(R.id.doctorsList);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_multiple_choice, new ArrayList<String>(doctorsList));
+        ListAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_multiple_choice, new ArrayList<String>(doctorsList));
         doctorsView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         doctorsView.setAdapter(adapter);
 

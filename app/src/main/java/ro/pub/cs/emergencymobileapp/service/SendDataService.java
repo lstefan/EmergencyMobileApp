@@ -1,5 +1,7 @@
 package ro.pub.cs.emergencymobileapp.service;
 
+import android.util.Log;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
@@ -16,6 +18,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
 
+import ro.pub.cs.emergencymobileapp.DataActivity;
 import ro.pub.cs.emergencymobileapp.dto.IncidentRequestDTO;
 
 /**
@@ -23,144 +26,154 @@ import ro.pub.cs.emergencymobileapp.dto.IncidentRequestDTO;
  */
 public class SendDataService {
 
-	private static SendDataService sendDataServiceInstance = null;
+    private static final String TAG = DataActivity.class.getSimpleName();
 
-	protected SendDataService() {
+    private static SendDataService sendDataServiceInstance = null;
 
-	}
+    private static Socket clientSocket = null;
 
-	public static SendDataService getSendDataService() {
-		if(sendDataServiceInstance == null) {
-			sendDataServiceInstance = new SendDataService();
-		}
-		return sendDataServiceInstance;
-	}
+    private String serverIp = "192.168.1.102";
 
-	public String sendIncident(IncidentRequestDTO incidentRequestDTO) {
+    protected SendDataService() {
 
-		HttpURLConnection conn = null;
-		OutputStream os = null;
-		InputStream is = null;
-		BufferedReader br = null;
-		String result = "";
+    }
 
-		try {
-			//constants
-			URL url = new URL("http://192.168.1.102:8080/incidents");
+    public static SendDataService getSendDataService() {
+        if (sendDataServiceInstance == null) {
+            sendDataServiceInstance = new SendDataService();
+        }
+        return sendDataServiceInstance;
+    }
 
-			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-			String message = ow.writeValueAsString(incidentRequestDTO);
+    public String sendIncident(IncidentRequestDTO incidentRequestDTO) {
 
-			conn = (HttpURLConnection) url.openConnection();
-			conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-			conn.setReadTimeout(10000 /*milliseconds*/);
-			conn.setConnectTimeout(15000 /* milliseconds */);
-			conn.setRequestMethod("POST");
-			String basicAuth = "Basic dXNlcjpwYXNzd29yZA==";
-			conn.setRequestProperty ("Authorization", basicAuth);
-			conn.setDoInput(true);
-			conn.setDoOutput(true);
-			conn.setFixedLengthStreamingMode(message.getBytes().length);
+        HttpURLConnection conn = null;
+        OutputStream os = null;
+        InputStream is = null;
+        BufferedReader br = null;
+        String result = "";
 
-			//make some HTTP header nicety
-			conn.setRequestProperty("Content-Type", "application/json;charset=utf-8");
-			conn.setRequestProperty("X-Requested-With", "XMLHttpRequest");
+        try {
+            //constants
+            URL url = new URL("http://" + serverIp + ":8080/incidents");
 
-			//open
-			conn.connect();
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            String message = ow.writeValueAsString(incidentRequestDTO);
 
-			//setup send
-			os = new BufferedOutputStream(conn.getOutputStream());
-			os.write(message.getBytes());
-			//clean up
-			os.flush();
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, " + "like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+            conn.setReadTimeout(10000 /*milliseconds*/);
+            conn.setConnectTimeout(15000 /* milliseconds */);
+            conn.setRequestMethod("POST");
+            String basicAuth = "Basic dXNlcjpwYXNzd29yZA==";
+            conn.setRequestProperty("Authorization", basicAuth);
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.setFixedLengthStreamingMode(message.getBytes().length);
 
-			//do something with response
-			int responseCode = conn.getResponseCode();
-			is = new BufferedInputStream(conn.getInputStream());
-			br = new BufferedReader(new InputStreamReader(is));
+            //make some HTTP header nicety
+            conn.setRequestProperty("Content-Type", "application/json;charset=utf-8");
+            conn.setRequestProperty("X-Requested-With", "XMLHttpRequest");
 
-			String inputLine = "";
-			StringBuffer sb = new StringBuffer();
-			while ((inputLine = br.readLine()) != null) {
-				sb.append(inputLine);
-			}
-			result = sb.toString();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			//clean up
-			try {
-				if (os != null) {
-					os.close();
-				}
-				if (is != null) {
-					is.close();
-				}
-				if (conn != null) {
-					conn.disconnect();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+            //open
+            conn.connect();
 
-		return result;
-	}
+            //setup send
+            os = new BufferedOutputStream(conn.getOutputStream());
+            os.write(message.getBytes());
+            //clean up
+            os.flush();
 
-	public String sendFrame(byte[] frame) {
-		String hostname = "192.168.1.102";
-		int port = 999;
+            //do something with response
+            int responseCode = conn.getResponseCode();
+            is = new BufferedInputStream(conn.getInputStream());
+            br = new BufferedReader(new InputStreamReader(is));
 
-		// declaration section:
-		// clientSocket: our client socket
-		// os: output stream
-		// is: input stream
+            String inputLine = "";
+            StringBuffer sb = new StringBuffer();
+            while ((inputLine = br.readLine()) != null) {
+                sb.append(inputLine);
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            //clean up
+            try {
+                if (os != null) {
+                    os.close();
+                }
+                if (is != null) {
+                    is.close();
+                }
+                if (conn != null) {
+                    conn.disconnect();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
-		Socket clientSocket = null;
-		DataOutputStream os = null;
-		BufferedReader is = null;
-		String result = "";
+        return result;
+    }
 
-		// Initialization section:
-		// Try to open a socket on the given port
-		// Try to open input and output streams
+    public String sendFrame(byte[] frame) {
+        String hostname = serverIp;
+        int port = 999;
 
-		try {
-			clientSocket = new Socket(hostname, port);
-			os = new DataOutputStream(clientSocket.getOutputStream());
-			is = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-		} catch (UnknownHostException e) {
-			System.err.println("Don't know about host: " + hostname);
-		} catch (IOException e) {
-			System.err.println("Couldn't get I/O for the connection to: " + hostname);
-		}
+        // declaration section:
+        // clientSocket: our client socket
+        // os: output stream
+        // is: input stream
 
-		// If everything has been initialized then we want to write some data
-		// to the socket we have opened a connection to on the given port
+        DataOutputStream os = null;
+        BufferedReader is = null;
+        String result = "";
 
-		if (clientSocket == null || os == null || is == null) {
-			System.err.println("Something is wrong. One variable is null.");
-			return result;
-		}
+        // Initialization section:
+        // Try to open a socket on the given port
+        // Try to open input and output streams
 
-		try {
-			os.write(frame);
-            os.writeBytes("\r\n");
+        try {
+            if (clientSocket == null || clientSocket.isClosed()) {
+                Log.d(TAG, "null socket or closed socket");
+                clientSocket = new Socket(hostname, port);
+            }
+            os = new DataOutputStream(clientSocket.getOutputStream());
+            is = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        } catch (UnknownHostException e) {
+            System.err.println("Don't know about host: " + hostname);
+        } catch (IOException e) {
+            System.err.println("Couldn't get I/O for the connection to: " + hostname);
+        }
 
-			// clean up:
-			// close the output stream
-			// close the input stream
-			// close the socket
+        // If everything has been initialized then we want to write some data
+        // to the socket we have opened a connection to on the given port
 
-			os.close();
-			is.close();
-			clientSocket.close();
-		} catch (UnknownHostException e) {
-			System.err.println("Trying to connect to unknown host: " + e);
-		} catch (IOException e) {
-			System.err.println("IOException:  " + e);
-		}
-		return result;
-	}
+        if (clientSocket == null || os == null || is == null) {
+            System.err.println("Something is wrong. One variable is null.");
+            Log.d(TAG, "Something is wrong. One variable is null.");
+            return result;
+        }
+
+        try {
+            os.write(frame);
+            //os.writeBytes("\r\n");
+            //os.writeUTF(String.format("\r\n"));
+            Log.d(TAG, "Write data to socket size " + frame.length + "os " + os.size());
+            // clean up:
+            // close the output stream
+            // close the input stream
+            // close the socket
+
+            //os.close();
+            //is.close();
+            //clientSocket.close();
+        } catch (UnknownHostException e) {
+            System.err.println("Trying to connect to unknown host: " + e);
+        } catch (IOException e) {
+            System.err.println("IOException:  " + e);
+        }
+        return result;
+    }
 }

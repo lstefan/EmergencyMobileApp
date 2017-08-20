@@ -39,12 +39,40 @@ public class MainActivity extends AppCompatActivity {
     private SpinnerSelectionListener spinnerSelectionListener = new SpinnerSelectionListener();
     private ListSelectionListener listSelectionListener = new ListSelectionListener();
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        emergencyButton = (Button) findViewById(R.id.buttonEmergency);
+        emergencyButton.setEnabled(false);
+        emergencyButton.setOnClickListener(buttonClickListener);
+
+        typeSpinner = (Spinner) findViewById(R.id.spinnerType);
+        prioritySpinner = (Spinner) findViewById(R.id.spinnerPriority);
+        peopleSpinner = (Spinner) findViewById(R.id.spinnerNoPeople);
+
+        typeSpinner.setOnItemSelectedListener(spinnerSelectionListener);
+        prioritySpinner.setOnItemSelectedListener(spinnerSelectionListener);
+        peopleSpinner.setOnItemSelectedListener(spinnerSelectionListener);
+
+        doctorsListView = (ListView) findViewById(R.id.doctorsList);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout
+                .simple_list_item_multiple_choice, listContent);
+        doctorsListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        doctorsListView.setAdapter(adapter);
+        doctorsListView.setOnItemClickListener(listSelectionListener);
+    }
+
     private class ButtonClickListener implements Button.OnClickListener {
 
         @Override
         public void onClick(View view) {
             Toast.makeText(getApplication(), "Emergency call!", Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(getBaseContext(), MapsActivity.class);
+            Intent intent = new Intent(getBaseContext(), DataActivity.class);
             intent.putExtra(Constants.TYPE_KEY, type);
             intent.putExtra(Constants.NO_OF_PEOPLE_KEY, people);
             intent.putExtra(Constants.PRIORITY_KEY, priority);
@@ -101,34 +129,6 @@ public class MainActivity extends AppCompatActivity {
                 emergencyButton.setEnabled(false);
             }
         }
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        emergencyButton = (Button) findViewById(R.id.buttonEmergency);
-        emergencyButton.setEnabled(false);
-        emergencyButton.setOnClickListener(buttonClickListener);
-
-        typeSpinner = (Spinner) findViewById(R.id.spinnerType);
-        prioritySpinner = (Spinner) findViewById(R.id.spinnerPriority);
-        peopleSpinner = (Spinner) findViewById(R.id.spinnerNoPeople);
-
-        typeSpinner.setOnItemSelectedListener(spinnerSelectionListener);
-        prioritySpinner.setOnItemSelectedListener(spinnerSelectionListener);
-        peopleSpinner.setOnItemSelectedListener(spinnerSelectionListener);
-
-        doctorsListView = (ListView) findViewById(R.id.doctorsList);
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout
-                .simple_list_item_multiple_choice, listContent);
-        doctorsListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        doctorsListView.setAdapter(adapter);
-        doctorsListView.setOnItemClickListener(listSelectionListener);
     }
 
 }

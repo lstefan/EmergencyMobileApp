@@ -108,4 +108,6 @@
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_connection">ConnectionActivity</string>
     <string name="title_activity_data">DataActivity</string>
+    <string name="title_activity_stream">StreamActivity</string>
+    <string name="title_activity_video">VideoActivity</string>
 </resources>
