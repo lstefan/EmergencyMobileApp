@@ -4,7 +4,7 @@ public interface Constants {
 
 	public static final String HOST = "192.168.1.102";
 	public static final int TCP_PORT = 9999;
-    public static final int UDP_PORT = 9998;
+	public static final int UDP_AUDIO_PORT = 9998;
 
 	public static final String TYPE_KEY = "TYPE";
 	public static final String NO_OF_PEOPLE_KEY = "NO_OF_PEOPLE";

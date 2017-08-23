@@ -9,19 +9,31 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import message.Message;
 import ro.pub.cs.emergencymobileapp.utils.Constants;
+import ro.pub.cs.emergencymobileapp.utils.ServiceUtils;
 
 public class AudioRecorder extends Thread {
 
-    public byte[] byteAudioBuffer;
-
-    AudioRecord recorder;
-
-    private int sampleRate = 8000;//8000; 16000 for voice
+    private byte[] byteAudioBuffer;
+    private AudioRecord recorder;
+    private int sampleRate = 8000;
     private int channelConfig = AudioFormat.CHANNEL_IN_MONO;
     private int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
-    int minBufSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat);
+    private int minBufSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat);
     private boolean status = true;
+
+    private DatagramSocket audioSocket;
+    private InetAddress ipAddress;
+
+    public AudioRecorder() {
+        try {
+            audioSocket = new DatagramSocket();
+            ipAddress = InetAddress.getByName(Constants.HOST);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void run() {
@@ -31,9 +43,9 @@ public class AudioRecorder extends Thread {
 
         Log.d(Constants.TAG, "Buffer created of size " + minBufSize);
 
-
         recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate, channelConfig, audioFormat, minBufSize);
         Log.d(Constants.TAG, "Recorder initialized");
+
         if (recorder.getState() != AudioRecord.STATE_INITIALIZED) {
             Log.e(Constants.TAG, "Audio Record can't initialize!");
             return;
@@ -43,23 +55,24 @@ public class AudioRecorder extends Thread {
         recorder.startRecording();
 
         while (status) {
-            //if (DataActivity.pictureFlag) {
-            //reading data from MIC into byteAudioBuffer
             minBufSize = recorder.read(shortsAudioBuffer, 0, shortsAudioBuffer.length);
             byteAudioBuffer = short2byte(shortsAudioBuffer);
 
+            //Create message
+            Message message = new Message();
+            message.setType(Message.AUDIO_FILE);
+            message.setAudio(byteAudioBuffer);
+
+            //serialize message
+            byte[] serializedMessage = ServiceUtils.serializeMessage(message);
+
             try {
-                DatagramSocket clientSocket = new DatagramSocket();
-                InetAddress IPAddress = InetAddress.getByName(Constants.HOST);
-                DatagramPacket sendPacket = new DatagramPacket(byteAudioBuffer, byteAudioBuffer.length, IPAddress, Constants.UDP_PORT);
+                DatagramPacket sendPacket = new DatagramPacket(serializedMessage, serializedMessage.length, ipAddress, Constants.UDP_AUDIO_PORT);
                 Log.d(Constants.TAG, "Am trimis " + byteAudioBuffer.length);
-                clientSocket.send(sendPacket);
-                clientSocket.close();
+                audioSocket.send(sendPacket);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            System.out.println("MinBufferSize: " + minBufSize);
             shortsAudioBuffer = new short[minBufSize];
 
             try {
@@ -67,7 +80,6 @@ public class AudioRecorder extends Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            //}
         }
 
         recorder.release();

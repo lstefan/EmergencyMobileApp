@@ -69,10 +69,12 @@
         <activity
             android:name=".DataActivity"
             android:label="@string/title_activity_data"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboardHidden|orientation">
         </activity>
 
-        <service android:name=".service.SendDataAndroidService" >
+        <service android:name=".service.SendImageService" >
         </service>
     </application>
 

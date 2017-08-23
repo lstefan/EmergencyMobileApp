@@ -15,10 +15,10 @@ import ro.pub.cs.emergencymobileapp.DataActivity;
 import ro.pub.cs.emergencymobileapp.utils.Constants;
 
 
-public class SendDataAndroidService extends IntentService {
+public class SendImageService extends IntentService {
 
-    public SendDataAndroidService() {
-        super("SendDataAndroidService");
+    public SendImageService() {
+        super("SendImageService");
     }
 
     @Override
@@ -46,17 +46,10 @@ public class SendDataAndroidService extends IntentService {
             Log.d(Constants.TAG, "PICTURE = " + sendPicture);
             openSocket();
             sendAuthenticationMessage();
-            DataActivity.audioRecorder.start();
         }
 
         if(sendPicture) {
             Log.d(Constants.TAG, "Sending picture...");
-            Log.d(Constants.TAG, "START = " + startTransmission);
-            Log.d(Constants.TAG, "PICTURE = " + sendPicture);
-//            if (socket == null || !socket.isConnected()) {
-//                Log.d(Constants.TAG, "Reopening socket...");
-//                openSocket();
-//            }
 
             byte[] temp = intent.getByteArrayExtra("picture");
             if(temp == null || temp.length == 0) {
@@ -66,19 +59,19 @@ public class SendDataAndroidService extends IntentService {
             Message message = new Message();
             message.setPicture(temp);
             message.setType(Message.PICTURE_FILE);
-            Log.d(Constants.TAG, "Sending " + temp.length + " bytes...");
+
+            Log.d(Constants.TAG, "Image size =  " + temp.length);
+
             try {
                 DataActivity.out.writeObject(message);
-                Log.d(Constants.TAG, "Picture sent");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
+//            try {
+//                Thread.sleep(100);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 
