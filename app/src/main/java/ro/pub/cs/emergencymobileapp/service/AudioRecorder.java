@@ -60,7 +60,7 @@ public class AudioRecorder extends Thread {
 
             //Create message
             Message message = new Message();
-            message.setType(Message.AUDIO_FILE);
+            message.setType(Message.SEND_AUDIO);
             message.setAudio(byteAudioBuffer);
 
             //serialize message

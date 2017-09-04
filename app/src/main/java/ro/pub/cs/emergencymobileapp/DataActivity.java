@@ -6,6 +6,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -13,42 +14,33 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
 
 import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
+import java.io.IOException;
 
-import ro.pub.cs.emergencymobileapp.service.AudioRecorder;
+import message.Message;
+import ro.pub.cs.emergencymobileapp.service.CommunicateToServer;
 import ro.pub.cs.emergencymobileapp.service.SendImageService;
 import ro.pub.cs.emergencymobileapp.utils.Constants;
+import ro.pub.cs.emergencymobileapp.utils.GlobalParams;
 
 public class DataActivity extends AppCompatActivity implements SurfaceHolder.Callback {
 
-    private static final String TAG = DataActivity.class.getSimpleName();
-
-    private Button sendPictureButton;
-
+    private Boolean pictureFlag = false;
+    private Context mContext;
     private int width = 640;
     private int height = 480;
-    //new
-    Camera camera;
-    SurfaceView surfaceView;
-    SurfaceHolder surfaceHolder;
+    private long getFrameTime = 0;
 
-    Camera.PictureCallback jpegCallback;
-    Camera.PreviewCallback previewCallback;
-
-    String incidentId;
-    public static Boolean pictureFlag = false;
-    static Context mContext;
-
-    public static Socket socket;
-    public static ObjectOutputStream out = null;
-    public static ObjectInputStream in = null;
-    public static AudioRecorder audioRecorder = new AudioRecorder();
-    public long getFrameTime = 0;
+    private Camera camera;
+    private SurfaceView surfaceView;
+    private SurfaceHolder surfaceHolder;
+    private Camera.PreviewCallback previewCallback;
+    private Button sendPictureButton;
 
     private ButtonClickListener sendButtonListener = new ButtonClickListener();
 
@@ -59,15 +51,45 @@ public class DataActivity extends AppCompatActivity implements SurfaceHolder.Cal
             if (pictureFlag == false) {
                 Log.d(Constants.TAG, "Set pictureFlag = true");
                 pictureFlag = true;
+                sendPictureButton.setText("Stop video");
                 refreshCamera();
                 return;
             }
             if (pictureFlag == true) {
                 Log.d(Constants.TAG, "Set pictureFlag = false");
+                sendPictureButton.setText("Start video");
                 pictureFlag = false;
                 refreshCamera();
                 return;
             }
+        }
+    }
+
+
+    //chat
+    private EditText messageEditText;
+    private ListView messageListView;
+    private Button sendMessageButton;
+    private ArrayAdapter<String> chatAdapter;
+
+    private SendMessageButtonClickListener sendMessageButtonClickListener = new SendMessageButtonClickListener();
+
+    private class SendMessageButtonClickListener implements Button.OnClickListener {
+
+        @Override
+        public void onClick(View view) {
+            sendChatMessage();
+        }
+    }
+
+    private void sendChatMessage() {
+        String enteredMessage = messageEditText.getText().toString();
+        if(!enteredMessage.isEmpty()) {
+            String chatMessage = GlobalParams.requesterID + ":" + enteredMessage;
+            chatAdapter.add(chatMessage);
+            //TODO: send to server
+            CommunicateToServer.sendMessageToServer(enteredMessage);
+            messageEditText.setText("");
         }
     }
 
@@ -84,8 +106,45 @@ public class DataActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         mContext = getApplicationContext();
 
-        Intent intent = getIntent();
-        incidentId = intent.getStringExtra(Constants.INCIDENT_KEY);
+//        TextView textView = (TextView)findViewById(R.id.textVideo);
+//        textView.setText("In call with user <b>" + GlobalParams.doctorID + "</b>");
+
+//        Intent intent = getIntent();
+
+        //chat
+        messageEditText = (EditText) findViewById(R.id.messageEditText);
+        messageListView = (ListView) findViewById(R.id.msgListView);
+        sendMessageButton = (Button) findViewById(R.id.sendMessageButton);
+        sendMessageButton.setOnClickListener(sendMessageButtonClickListener);
+        chatAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+        messageListView.setAdapter(chatAdapter);
+
+        // ----Set autoscroll of listview when a new message arrives----//
+        messageListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        messageListView.setStackFromBottom(true);
+
+        ReadMessageFromServerTask readMessageTask = new ReadMessageFromServerTask();
+        readMessageTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+//        new Thread(new Runnable() {
+//            public void run() {
+//                Message message = null;
+//                while(true) {
+//                    try {
+//                        message = (Message) GlobalParams.in.readObject();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    } catch (ClassNotFoundException e) {
+//                        e.printStackTrace();
+//                    }
+//                    if(message != null && message.getType() == Message.SEND_MESSAGE) {
+//                        String chatMessage = message.getDoctorID() + ":" + message.getMessage();
+//                        chatAdapter.add(chatMessage);
+//                    }
+//                }
+//            }
+//        }).start();
+        //end chat
 
         sendPictureButton = (Button) findViewById(R.id.capture_button);
         sendPictureButton.setOnClickListener(sendButtonListener);
@@ -100,11 +159,15 @@ public class DataActivity extends AppCompatActivity implements SurfaceHolder.Cal
         // deprecated setting, but required on Android versions prior to 3.0
         surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
-        audioRecorder.start();
+        if(!GlobalParams.audioRecorder.isAlive()) {
+            GlobalParams.audioRecorder.start();
+        }
 
-        Intent i = new Intent(this, SendImageService.class);
-        i.putExtra("START", true);
-        startService(i);
+//        Intent i = new Intent(this, SendImageService.class);
+//        i.putExtra("START", true);
+//        startService(i);
+
+
 
 
         previewCallback = new Camera.PreviewCallback() {
@@ -218,5 +281,32 @@ public class DataActivity extends AppCompatActivity implements SurfaceHolder.Cal
         Log.d(Constants.TAG, "onSavedInstanceState");
         outState.putBoolean("PICTURE_FLAG", pictureFlag);
         super.onSaveInstanceState(outState);
+    }
+
+    private class ReadMessageFromServerTask extends AsyncTask<Void, String, Void> {
+
+        @Override
+        protected void onProgressUpdate(String... item) {
+            chatAdapter.add(item[0]);
+        }
+        @Override
+        protected Void doInBackground(Void... params) {
+            Log.d(Constants.TAG, "Waiting for messages...");
+            Message message = null;
+
+            while(true) {
+                try {
+                    message = (Message) GlobalParams.in.readObject();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                if(message != null && message.getType() == Message.SEND_MESSAGE) {
+                    String chatMessage = message.getDoctorID() + ":" + message.getMessage();
+                    publishProgress(chatMessage);
+                }
+            }
+        }
     }
 }

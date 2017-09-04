@@ -10,21 +10,22 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.Toast;
 
-import java.io.Serializable;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import ro.pub.cs.emergencymobileapp.utils.Constants;
+import ro.pub.cs.emergencymobileapp.dto.IncidentRequest;
+import ro.pub.cs.emergencymobileapp.utils.GlobalParams;
 
 public class MainActivity extends AppCompatActivity {
 
     final private static String DEFAULT_SELECT = "Please select";
 
     private String[] listContent = {"Audiologist", "Allergist", "Cardiologist", "Dermatologist", "Emergency Doctor",
-            "Endocrinologist", "Epidemiologist", "General Practitioner", "Hepatologist", "Infectious Disease ",
-            "Specialist", "Neurophysiologist", "Obstetrician", "Oncologist", "Orthopedist", "Psychiatrist"};
+            "Endocrinologist", "General Practitioner", "Hepatologist", "Infectious Disease Specialist",
+            "Neurologist", "Obstetrician", "Oncologist", "Ophthalmologist", "Orthopedist", "Pediatrician",
+            "Psychiatrist", "Radiologist", "Surgeon"};
 
     private String type;
     private String priority;
@@ -71,14 +72,27 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View view) {
-            Toast.makeText(getApplication(), "Emergency call!", Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(getBaseContext(), DataActivity.class);
-            intent.putExtra(Constants.TYPE_KEY, type);
-            intent.putExtra(Constants.NO_OF_PEOPLE_KEY, people);
-            intent.putExtra(Constants.PRIORITY_KEY, priority);
-            intent.putExtra(Constants.SPECIALIZATION_KEY, (Serializable) doctorsListContent);
+            //Toast.makeText(getApplication(), "Emergency call!", Toast.LENGTH_LONG).show();
+            GlobalParams.incidentRequest = createIncidentRequest();
+            //GlobalParams.requesterID = "LiviaAndroid";
+
+            Intent intent = new Intent(getBaseContext(), MapsActivity.class);
+//            intent.putExtra(Constants.TYPE_KEY, type);
+//            intent.putExtra(Constants.NO_OF_PEOPLE_KEY, people);
+//            intent.putExtra(Constants.PRIORITY_KEY, priority);
+//            intent.putExtra(Constants.SPECIALIZATION_KEY, (Serializable) doctorsListContent);
             startActivity(intent);
         }
+    }
+
+    private IncidentRequest createIncidentRequest() {
+        IncidentRequest incidentRequest = new IncidentRequest();
+        incidentRequest.setType(type);
+        incidentRequest.setPriority(priority);
+        incidentRequest.setDateCreated(new Date().getTime());
+        incidentRequest.setNoOfPeople(people);
+        incidentRequest.setSpecializationList(doctorsListContent);
+        return incidentRequest;
     }
 
     private class SpinnerSelectionListener implements AdapterView.OnItemSelectedListener {

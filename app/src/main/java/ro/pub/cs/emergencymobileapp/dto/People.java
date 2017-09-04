@@ -1,4 +1,4 @@
-package ro.pub.cs.emergencymobileapp.utils;
+package ro.pub.cs.emergencymobileapp.dto;
 
 public enum People {
 	ONE ("1"),

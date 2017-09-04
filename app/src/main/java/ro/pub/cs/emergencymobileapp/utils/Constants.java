@@ -13,6 +13,7 @@ public interface Constants {
 	public static final String LATITUDE_KEY = "LATITUDE";
 	public static final String LONGITUDE_KEY = "LONGITUDE";
 	public static final String INCIDENT_KEY = "INCIDENT";
+	public static final String DATE_KEY = "DATE";
 
 	public static String  TAG                                = "myapp";
 

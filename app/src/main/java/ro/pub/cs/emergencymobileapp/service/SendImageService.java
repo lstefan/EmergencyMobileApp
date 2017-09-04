@@ -11,7 +11,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import message.Message;
-import ro.pub.cs.emergencymobileapp.DataActivity;
+import ro.pub.cs.emergencymobileapp.utils.GlobalParams;
+import ro.pub.cs.emergencymobileapp.dto.IncidentRequest;
 import ro.pub.cs.emergencymobileapp.utils.Constants;
 
 
@@ -26,13 +27,15 @@ public class SendImageService extends IntentService {
         boolean startTransmission = intent.getBooleanExtra("START", false);
         boolean endTransmission = intent.getBooleanExtra("END", false);
         boolean sendPicture = intent.getBooleanExtra("PICTURE", false);
+        boolean requestDoctor = intent.getBooleanExtra("REQUEST_DOCTOR", false);
+        IncidentRequest incidentRequest = (IncidentRequest) intent.getSerializableExtra("INCIDENT");
 
         if(endTransmission) {
             Log.d(Constants.TAG, "Stopping transmission...");
             try {
-                DataActivity.out.close();
-                DataActivity.in.close();
-                DataActivity.socket.close();
+                GlobalParams.out.close();
+                GlobalParams.in.close();
+                GlobalParams.socket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -57,13 +60,14 @@ public class SendImageService extends IntentService {
                 return;
             }
             Message message = new Message();
+            message.setRequesterID(GlobalParams.requesterID);
             message.setPicture(temp);
-            message.setType(Message.PICTURE_FILE);
+            message.setType(Message.SEND_IMAGE);
 
             Log.d(Constants.TAG, "Image size =  " + temp.length);
 
             try {
-                DataActivity.out.writeObject(message);
+                GlobalParams.out.writeObject(message);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -75,23 +79,25 @@ public class SendImageService extends IntentService {
         }
     }
 
+
     private void sendAuthenticationMessage() {
         Message message = new Message();
+        message.setRequesterID(GlobalParams.requesterID);
         message.setType(Message.AUTHENTICATE_USER);
         try {
-            DataActivity.out.writeObject(message);
+            GlobalParams.out.writeObject(message);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void openSocket() {
-        DataActivity.socket = new Socket();
+        GlobalParams.socket = new Socket();
         try {
-            DataActivity.socket.connect(new InetSocketAddress(Constants.HOST, Constants.TCP_PORT));
+            GlobalParams.socket.connect(new InetSocketAddress(Constants.HOST, Constants.TCP_PORT));
             Log.d(Constants.TAG, "Connecting to server...");
-            DataActivity.out = new ObjectOutputStream(DataActivity.socket.getOutputStream());
-            DataActivity.in = new ObjectInputStream(DataActivity.socket.getInputStream());
+            GlobalParams.out = new ObjectOutputStream(GlobalParams.socket.getOutputStream());
+            GlobalParams.in = new ObjectInputStream(GlobalParams.socket.getInputStream());
         } catch (IOException e) {
             Log.d(Constants.TAG, "Error connecting. Exiting...");
             e.printStackTrace();

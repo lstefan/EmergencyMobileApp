@@ -13,6 +13,13 @@
     tools:context="ro.pub.cs.emergencymobileapp.ConnectionActivity"
     tools:showIn="@layout/activity_connection">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/confirm"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -90,9 +97,9 @@
 
         <ListView
             android:id="@+id/doctorsList"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="225dp"
-            android:layout_weight="0.29">
+            >
         </ListView>
     </LinearLayout>
 

@@ -23,11 +23,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
-
-import ro.pub.cs.emergencymobileapp.utils.Constants;
+import ro.pub.cs.emergencymobileapp.utils.GlobalParams;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -60,12 +56,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private EditText longitudeEditText = null;
     private Button nextButton = null;
 
-    // Received data
-    private String people;
-    private String priority;
-    private String type;
-    private Set<String> doctorsList = new HashSet<String>();
-    // End of Received data
 
     private NextButtonListener nextButtonListener = new NextButtonListener();
 
@@ -74,12 +64,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         public void onClick(View view) {
             Intent intent = new Intent(getBaseContext(), ConnectionActivity.class);
-            intent.putExtra(Constants.TYPE_KEY, type);
-            intent.putExtra(Constants.NO_OF_PEOPLE_KEY, people);
-            intent.putExtra(Constants.PRIORITY_KEY, priority);
-            intent.putExtra(Constants.SPECIALIZATION_KEY, (Serializable) doctorsList);
-            intent.putExtra(Constants.LATITUDE_KEY, latitudeEditText.getText().toString());
-            intent.putExtra(Constants.LONGITUDE_KEY, longitudeEditText.getText().toString());
+            GlobalParams.incidentRequest.setInitialLatitude(latitudeEditText.getText().toString());
+            GlobalParams.incidentRequest.setInitialLongitude(longitudeEditText.getText().toString());
             startActivity(intent);
         }
     }
@@ -96,14 +82,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         setContentView(R.layout.activity_maps);
-
-        //get data from intent
-        Intent intent = getIntent();
-
-        type =  intent.getStringExtra(Constants.TYPE_KEY);
-        people =  intent.getStringExtra(Constants.NO_OF_PEOPLE_KEY);
-        priority =  intent.getStringExtra(Constants.PRIORITY_KEY);
-        doctorsList = (Set<String>) intent.getSerializableExtra(Constants.SPECIALIZATION_KEY);
 
         latitudeEditText = (EditText) findViewById(R.id.latitude_edit_text);
         longitudeEditText = (EditText) findViewById(R.id.longitude_edit_text);
